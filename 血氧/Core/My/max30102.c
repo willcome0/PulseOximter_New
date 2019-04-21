@@ -1,6 +1,7 @@
 #include "max30102.h"
 #include "myiic.h"
-
+#include "algorithm.h"
+#include "LCD.h"
 
 uint8_t max30102_Bus_Write(uint8_t Register_Address, uint8_t Word_Data)
 {
@@ -248,7 +249,7 @@ void max30102_init(void)
 //	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
 // 	GPIO_Init(GPIOC, &GPIO_InitStructure);
 	
-	IIC_Init();
+//	IIC_Init();
 	
 	max30102_reset();
 	
@@ -377,7 +378,174 @@ void maxim_max30102_read_fifo(uint32_t *pun_red_led, uint32_t *pun_ir_led)
 }
 
 
+// 血氧相关
+uint32_t aun_ir_buffer[500]; //IR LED sensor data
+int32_t n_ir_buffer_length;    //data length
+uint32_t aun_red_buffer[500];    //Red LED sensor data
+int32_t n_sp02; //SPO2 value
+int8_t ch_spo2_valid;   //indicator to show if the SP02 calculation is valid
+int32_t n_heart_rate;   //heart rate value
+int8_t  ch_hr_valid;    //indicator to show if the heart rate calculation is valid
+uint8_t uch_dummy;
+
+
+#define MAX_BRIGHTNESS 255
+uint32_t red_min, red_max;
+uint32_t ir_min, ir_max;
+void dis_DrawCurve(uint32_t* data,uint8_t x, uint16_t color);
+
 void Max30102_Measure(void)
 {
+	////////////////////////////////////
+	uint32_t un_prev_data;  
+	int i;
+	int32_t n_brightness;
+	float f_temp;
+//	uint8_t temp_num=0;
+	uint8_t temp[6];
+//	uint8_t str[100];
+//	uint8_t dis_hr=0,dis_spo2=0;
+//	uint32_t draw_red_max = 0;  // 显示用
+//	uint32_t draw_red_min = 0;
+//	uint32_t draw_ir_max = 0;
+//	uint32_t draw_ir_min = 0;
 	
+	max30102_init();
+	red_min=0x3FFFF;
+	red_max=0;
+	
+	n_ir_buffer_length=500; //buffer length of 100 stores 5 seconds of samples running at 100sps
+	
+	//read the first 500 samples, and determine the signal range
+    for(i=0;i<n_ir_buffer_length;i++)
+    {
+        while(HAL_GPIO_ReadPin(INT_GPIO_Port, INT_Pin)==1);   //wait until the interrupt pin asserts
+        
+		max30102_FIFO_ReadBytes(REG_FIFO_DATA, temp); // 读取数据
+		aun_red_buffer[i] = (long)((long)((long)temp[0]&0x03)<<16) | (long)temp[1]<<8 | (long)temp[2];    // Combine values to get the actual number
+		aun_ir_buffer[i]  = (long)((long)((long)temp[3] & 0x03)<<16) |(long)temp[4]<<8 | (long)temp[5];   // Combine values to get the actual number
+            
+        if(red_min>aun_red_buffer[i])
+            red_min=aun_red_buffer[i];
+        if(red_max<aun_red_buffer[i])
+            red_max=aun_red_buffer[i];
+		
+		if(ir_min>aun_ir_buffer[i])
+            ir_min=aun_ir_buffer[i];
+        if(ir_max<aun_ir_buffer[i])
+            ir_max=aun_ir_buffer[i];
+		
+//		draw_red_max = red_max;
+//		draw_red_min = red_min;
+//		draw_ir_max = ir_max;
+//		draw_ir_min = ir_min;
+    }
+	un_prev_data=aun_red_buffer[i];
+	//calculate heart rate and SpO2 after first 500 samples (first 5 seconds of samples)
+    maxim_heart_rate_and_oxygen_saturation(aun_ir_buffer, n_ir_buffer_length, aun_red_buffer, &n_sp02, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid); 
+	
+	//////////////////////////////////////
+//	while (1) // 测一次或多次
+	{
+	/* USER CODE END WHILE */
+
+	/* USER CODE BEGIN 3 */
+//	sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, CTP.ctpxy.ctp_y);
+//	LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
+
+		i=0;
+        red_min=0x3FFFF;
+        red_max=0;
+		
+		//dumping the first 100 sets of samples in the memory and shift the last 400 sets of samples to the top
+        for(i=100;i<500;i++)
+        {
+            aun_red_buffer[i-100]=aun_red_buffer[i];
+            aun_ir_buffer[i-100]=aun_ir_buffer[i];
+            
+
+            if(red_min>aun_red_buffer[i])
+				red_min=aun_red_buffer[i];
+            if(red_max<aun_red_buffer[i])
+				red_max=aun_red_buffer[i];
+			
+
+        }
+		//take 100 sets of samples before calculating the heart rate.
+        for(i=400;i<500;i++)
+        {
+            un_prev_data=aun_red_buffer[i-1];
+            while(HAL_GPIO_ReadPin(INT_GPIO_Port, INT_Pin)==1);
+			
+            max30102_FIFO_ReadBytes(REG_FIFO_DATA, temp);
+			aun_red_buffer[i] =  (long)((long)((long)temp[0]&0x03)<<16) | (long)temp[1]<<8 | (long)temp[2];
+			aun_ir_buffer[i] = (long)((long)((long)temp[3] & 0x03)<<16) |(long)temp[4]<<8 | (long)temp[5];
+       
+			
+            if(aun_red_buffer[i]>un_prev_data)
+            {
+                f_temp=aun_red_buffer[i]-un_prev_data;
+                f_temp/=(red_max-red_min);
+                f_temp*=MAX_BRIGHTNESS;
+                n_brightness-=(int)f_temp;
+                if(n_brightness<0)
+                    n_brightness=0;
+            }
+            else
+            {
+                f_temp=un_prev_data-aun_red_buffer[i];
+                f_temp/=(red_max-red_min);
+                f_temp*=MAX_BRIGHTNESS;
+                n_brightness+=(int)f_temp;
+                if(n_brightness>MAX_BRIGHTNESS)
+                    n_brightness=MAX_BRIGHTNESS;
+            }
+			//send samples and calculation result to terminal program through UART
+//			if(ch_hr_valid == 1 && ch_spo2_valid ==1 && n_heart_rate<120 && n_sp02<110)
+//			{
+//				dis_hr = n_heart_rate;
+//				dis_spo2 = n_sp02;
+//			}
+//			else
+//			{
+//				dis_hr = 0;
+//				dis_spo2 = n_sp02;
+//			}
+			
+		}
+        maxim_heart_rate_and_oxygen_saturation(aun_ir_buffer, n_ir_buffer_length, aun_red_buffer, &n_sp02, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid);
+		printf("B%4d  S%4d\r\n", n_heart_rate, n_sp02); 
+		
+		dis_DrawCurve(aun_red_buffer, 20, RED);
+		dis_DrawCurve(aun_ir_buffer,   0, BLACK);
+	}
+}
+
+void dis_DrawCurve(uint32_t* data,uint8_t x, uint16_t color)
+{
+	uint16_t i;
+	uint32_t max=0, min=262144;
+	uint32_t temp;
+//	uint32_t compress;
+	
+	for(i=20;i<500;i++)
+	{
+		if(data[i]>max)
+		{
+			max = data[i];
+		}
+		if(data[i]<min)
+		{
+			min = data[i];
+		}
+	}
+	
+	for(i=10;i<250;i++)
+	{
+		temp  = (data[i*2] + data[i*2+1])/2 - min;
+		temp /= (max-min)/30;
+		if(temp>60)
+			temp=60;
+		LCD_DrawPoint(i, 83-x-temp, color);
+	}
 }

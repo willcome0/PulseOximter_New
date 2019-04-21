@@ -237,10 +237,17 @@ void delay_us(uint16_t us)
 }
 
 uint8_t g_INT = 0;
+uint8_t charge_state = 0;
+uint8_t last_charge_state = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TIM1)
 	{
+		if (HAL_GPIO_ReadPin(CHARGE_GPIO_Port, CHARGE_Pin) == GPIO_PIN_RESET)
+			charge_state = 1;
+		else
+			charge_state = 0;
+		
 //		ReadCTP(&CTP);
 //		g_INT = 1;
 	}

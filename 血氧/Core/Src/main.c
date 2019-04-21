@@ -148,19 +148,29 @@ int main(void)
 	LCD_ShowStr(80, 1, WHITE, BLACK, "血氧检测仪", 16);
 	LCD_Fill(65, 268, 175, 306, GRAYBLUE);
 	LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
-
-
 	
 	
 	while (1) // 测一次或多次
 	{
-	/* USER CODE END WHILE */
+    /* USER CODE END WHILE */
 
-	/* USER CODE BEGIN 3 */
-//	sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, CTP.ctpxy.ctp_y);
-//	LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
+    /* USER CODE BEGIN 3 */
+
 		Max30102_Measure();
-		while (1);
+		while (1)
+		{
+			char str[30];
+			sprintf(str, "%3d %3d", 999, CTP.ctpxy.ctp_y);
+			LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
+			if (last_charge_state != charge_state)
+			{
+				last_charge_state = charge_state;
+				if (charge_state)
+					LCD_ShowStr(187, 1, WHITE, BLACK, "電", 16);
+				else
+					LCD_ShowStr(187, 1, WHITE, BLACK, "箜", 16);
+			}
+		}
 	}
   /* USER CODE END 3 */
 }
@@ -236,4 +246,3 @@ void assert_failed(uint8_t *file, uint32_t line)
 #endif /* USE_FULL_ASSERT */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
-

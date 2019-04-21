@@ -98,6 +98,8 @@ void Error_Handler(void);
 #define DBB14_GPIO_Port GPIOB
 #define DBB15_Pin GPIO_PIN_15
 #define DBB15_GPIO_Port GPIOB
+#define CHARGE_Pin GPIO_PIN_6
+#define CHARGE_GPIO_Port GPIOC
 #define SCL_Pin GPIO_PIN_7
 #define SCL_GPIO_Port GPIOC
 #define SDA_Pin GPIO_PIN_8

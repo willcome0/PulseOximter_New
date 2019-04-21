@@ -375,3 +375,9 @@ void maxim_max30102_read_fifo(uint32_t *pun_red_led, uint32_t *pun_ir_led)
   *pun_red_led&=0x03FFFF;  //Mask MSB [23:18]
   *pun_ir_led&=0x03FFFF;  //Mask MSB [23:18]
 }
+
+
+void Max30102_Measure(void)
+{
+	
+}

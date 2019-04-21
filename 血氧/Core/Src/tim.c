@@ -222,13 +222,27 @@ void HAL_TIM_Base_MspDeInit(TIM_HandleTypeDef* tim_baseHandle)
 } 
 
 /* USER CODE BEGIN 1 */
+void delay_us(uint16_t us)
+{
+	uint16_t differ=0xffff-us-5;					//设定定时器计数器起始值
+	__HAL_TIM_SET_COUNTER(&htim3,differ);
+	HAL_TIM_Base_Start(&htim3);					//启动定时器
+
+  while(differ<0xffff-6)							//补偿，判断
+  {
+    differ=__HAL_TIM_GET_COUNTER(&htim3);			//查询计数器的计数值
+
+  }
+  HAL_TIM_Base_Stop(&htim3);
+}
+
 uint8_t g_INT = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	if (htim->Instance == TIM1)
 	{
-		ReadCTP(&CTP);
-		g_INT = 1;
+//		ReadCTP(&CTP);
+//		g_INT = 1;
 	}
 }
 

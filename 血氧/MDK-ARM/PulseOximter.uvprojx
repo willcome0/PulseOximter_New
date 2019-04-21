@@ -399,16 +399,6 @@
               <FilePath>..\Core\My\LCD.c</FilePath>
             </File>
             <File>
-              <FileName>MAX30100.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\MAX30100.c</FilePath>
-            </File>
-            <File>
-              <FileName>MAX30100.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\My\MAX30100.h</FilePath>
-            </File>
-            <File>
               <FileName>FT6206.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\My\FT6206.c</FilePath>
@@ -417,11 +407,6 @@
               <FileName>FT6206.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Core\My\FT6206.h</FilePath>
-            </File>
-            <File>
-              <FileName>iic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\iic.c</FilePath>
             </File>
             <File>
               <FileName>algorithm.c</FileName>
@@ -462,6 +447,16 @@
               <FileName>stm32f1xx_hal_msp.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_hal_msp.c</FilePath>
+            </File>
+            <File>
+              <FileName>max30102.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\max30102.c</FilePath>
+            </File>
+            <File>
+              <FileName>myiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\myiic.c</FilePath>
             </File>
           </Files>
         </Group>

@@ -557,7 +557,7 @@ void LCD_ShowBat(uint16_t x, uint16_t y, uint8_t state)
 void arc_chabu_area1(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t fc)
 {
 	
-	uint16_t x,y,xi,yi,color;
+	uint16_t x,y,xi,yi;
 	uint8_t e;
 	static int fi1 = 0;
 //	color=POINT_COLOR;

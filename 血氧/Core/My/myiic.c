@@ -1,26 +1,14 @@
-#include "iic.h"
+#include "myiic.h"
 #include "tim.h"
 
 
-void delay_us(uint16_t us)
-{
-	uint16_t differ=0xffff-us-5;					//设定定时器计数器起始值
 
-	__HAL_TIM_SET_COUNTER(&htim3,differ);
-
-	HAL_TIM_Base_Start(&htim3);					//启动定时器
-
-  while(differ<0xffff-6)							//补偿，判断
-
-  {
-
-    differ=__HAL_TIM_GET_COUNTER(&htim3);			//查询计数器的计数值
-
-  }
-
-  HAL_TIM_Base_Stop(&htim3);
+//初始化IIC
+void IIC_Init(void)
+{					     
+	
 }
-
+//产生IIC起始信号
 void IIC_Start(void)
 {
 	SDA_OUT();     //sda线输出
@@ -131,5 +119,98 @@ uint8_t IIC_Read_Byte(unsigned char ack)
         IIC_Ack(); //发送ACK   
     return receive;
 }
+
+
+void IIC_WriteBytes(uint8_t WriteAddr,uint8_t* data,uint8_t dataLength)
+{		
+	uint8_t i;	
+    IIC_Start();  
+
+	IIC_Send_Byte(WriteAddr);	    //发送写命令
+	IIC_Wait_Ack();
+	
+	for(i=0;i<dataLength;i++)
+	{
+		IIC_Send_Byte(data[i]);
+		IIC_Wait_Ack();
+	}				    	   
+    IIC_Stop();//产生一个停止条件 
+	HAL_Delay(10);	 
+}
+
+void IIC_ReadBytes(uint8_t deviceAddr, uint8_t writeAddr,uint8_t* data,uint8_t dataLength)
+{		
+	uint8_t i;	
+    IIC_Start();  
+
+	IIC_Send_Byte(deviceAddr);	    //发送写命令
+	IIC_Wait_Ack();
+	IIC_Send_Byte(writeAddr);
+	IIC_Wait_Ack();
+	IIC_Send_Byte(deviceAddr|0X01);//进入接收模式			   
+	IIC_Wait_Ack();
+	
+	for(i=0;i<dataLength-1;i++)
+	{
+		data[i] = IIC_Read_Byte(1);
+	}		
+	data[dataLength-1] = IIC_Read_Byte(0);	
+    IIC_Stop();//产生一个停止条件 
+	HAL_Delay(10);	 
+}
+
+void IIC_Read_One_Byte(uint8_t daddr,uint8_t addr,uint8_t* data)
+{				  	  	    																 
+    IIC_Start();  
+	
+	IIC_Send_Byte(daddr);	   //发送写命令
+	IIC_Wait_Ack();
+	IIC_Send_Byte(addr);//发送地址
+	IIC_Wait_Ack();		 
+	IIC_Start();  	 	   
+	IIC_Send_Byte(daddr|0X01);//进入接收模式			   
+	IIC_Wait_Ack();	 
+    *data = IIC_Read_Byte(0);		   
+    IIC_Stop();//产生一个停止条件	    
+}
+
+void IIC_Write_One_Byte(uint8_t daddr,uint8_t addr,uint8_t data)
+{				   	  	    																 
+    IIC_Start();  
+	
+	IIC_Send_Byte(daddr);	    //发送写命令
+	IIC_Wait_Ack();
+	IIC_Send_Byte(addr);//发送地址
+	IIC_Wait_Ack();	   	 										  		   
+	IIC_Send_Byte(data);     //发送字节							   
+	IIC_Wait_Ack();  		    	   
+    IIC_Stop();//产生一个停止条件 
+	HAL_Delay(10);	 
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

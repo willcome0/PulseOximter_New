@@ -1,5 +1,5 @@
 #include "FT6206.h"
-#include "iic.h"
+#include "myiic.h"
 
 
 struTouch CTP;
@@ -31,16 +31,16 @@ uint8_t FT6206_Read_Reg(uint8_t *pbuf,uint32_t len)
 }
 #define X_MAX_PIXEL         240
 #define Y_MAX_PIXEL         320
-static  struTouch  ctplast={0,0,NO_TOUCH,X_NO_MOVING,Y_NO_MOVING,};
+//static struTouch  ctplast={0,0,NO_TOUCH,X_NO_MOVING,Y_NO_MOVING,};
 void  ReadCTP(struTouch *nowctp)
 {
     uint8_t    ctpbuf[10];
 
-    ctplast.ctpxy.ctp_x   = nowctp->ctpxy.ctp_x;
-    ctplast.ctpxy.ctp_y   = nowctp->ctpxy.ctp_y;
-    ctplast.ctpmainstatus = nowctp->ctpmainstatus;
-    ctplast.dx            = nowctp->dx;
-    ctplast.dy            = nowctp->dy;
+//    ctplast.ctpxy.ctp_x   = nowctp->ctpxy.ctp_x;
+//    ctplast.ctpxy.ctp_y   = nowctp->ctpxy.ctp_y;
+//    ctplast.ctpmainstatus = nowctp->ctpmainstatus;
+//    ctplast.dx            = nowctp->dx;
+//    ctplast.dy            = nowctp->dy;
 
     // 读取现在的坐标值
     FT6206_Read_Reg(ctpbuf, 7);
@@ -141,11 +141,12 @@ typedef  enum{
     FALSE = 0,
     TRUE  = !FALSE,
 }BOOL;
+
 BOOL is_touch_area(struTouch  nowctp,uint16_t x,uint16_t y,uint16_t w,uint16_t h,uint16_t margin)
 {
-	return nowctp.ctpmainstatus == TOUCHED 
+	return (BOOL)(nowctp.ctpmainstatus == TOUCHED 
 		&& nowctp.ctpxy.ctp_x >= x - margin 
 		&& nowctp.ctpxy.ctp_x <= x + w + margin 
 		&& nowctp.ctpxy.ctp_y >= y - margin 
-		&& nowctp.ctpxy.ctp_y <= y + h + margin;
+		&& nowctp.ctpxy.ctp_y <= y + h + margin);
 }

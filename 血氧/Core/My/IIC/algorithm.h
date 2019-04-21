@@ -62,8 +62,7 @@
 #ifndef ALGORITHM_H_
 #define ALGORITHM_H_
 
-#include "main.h"
-#include "stm32f1xx_hal.h"
+#include "sys.h"
 
 #define true 1
 #define false 0

@@ -488,9 +488,9 @@ void LCD_ShowPic(uint16_t x, uint16_t y, uint16_t length, uint16_t width, uint16
 void LCD_ShowPic_Heart(uint8_t show_flag)
 {
 	if (show_flag)
-		LCD_ShowPic(205, 30, 32, 32, RED, WHITE, heart);
+		LCD_ShowPic(205, 115, 32, 32, RED, LGRAYBLUE, heart);
 	else
-		LCD_Fill(205, 30, 237, 62, WHITE);
+		LCD_Fill(205, 115, 237, 62, LGRAYBLUE);
 }
 
 void LCD_ShowStr(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, char *str, uint8_t size)

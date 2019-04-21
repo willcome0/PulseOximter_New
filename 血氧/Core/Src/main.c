@@ -40,7 +40,9 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "adc.h"
 #include "dac.h"
+#include "rtc.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
@@ -85,6 +87,18 @@ void Updata_BatIco(void)
 			LCD_ShowStr(187, 1, WHITE, BLACK, "電", 16);
 		else
 			LCD_ShowStr(187, 1, WHITE, BLACK, "箜", 16);
+	}
+}
+
+void Updata_Time(void)
+{
+	char str[10] = {0};
+	HAL_RTC_GetTime(&hrtc, &Time, RTC_FORMAT_BIN);
+	if (last_seconds != Time.Seconds)
+	{
+		last_seconds = Time.Seconds;
+		sprintf(str, "%02d:%02d", Time.Hours, Time.Minutes);
+		LCD_ShowStr(0, 2, WHITE, BLACK, str, 16);
 	}
 }
 /* USER CODE END PV */
@@ -133,6 +147,8 @@ int main(void)
   MX_DAC_Init();
   MX_TIM2_Init();
   MX_TIM1_Init();
+  MX_RTC_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 
 	LCD_Init();
@@ -153,46 +169,48 @@ int main(void)
 	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
 	
 
-
+begin: ;
+	LCD_Clear(WHITE);
 	LCD_Fill(0, 0, 240, 18, BLACK);
 	LCD_ShowBat(210, 4, 4);
 	LCD_ShowStr(80, 1, WHITE, BLACK, "血氧检测仪", 16);
 	LCD_Fill(65, 268, 175, 306, GRAYBLUE);
 	LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 	
+	LCD_Fill(0, 110, 240, 174, LGRAYBLUE);
+	LCD_ShowStr(5, 115, BLACK, LGRAYBLUE, "心率: --次/min ", 24);
+	LCD_ShowStr(5, 145, BLACK, LGRAYBLUE, "血氧浓度: ---%", 24);
+	LCD_ShowPic_Heart(1);
 	
+	LCD_DrawLine(4, 24, 4, 100, BLACK);
+	LCD_DrawLine(5, 24, 5, 100, BLACK);
+	LCD_DrawLine(2, 97, 238, 97, BLACK);
+	LCD_DrawLine(2, 98, 238, 98, BLACK);
+	last_seconds = 66;
 	while (1) // 测一次或多次
 	{
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		uint8_t touch_title = 0;
-		uint8_t touch_bat = 0;
 		
 //		Max30102_Measure();
 		while (1)
 		{
 
-			
-			
+
 			// 显示充电标识
 			Updata_BatIco();
+			Updata_Time();
 			
 			// 显示触摸坐标
 			if (CTP.ctpxy.ctp_x != 999 && CTP.ctpxy.ctp_y != 999)
 			{
-				char str[30];
+//				char str[30];
 //				sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, CTP.ctpxy.ctp_y);
 //				LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
 	
 			}
 			
-			// 不再触摸，把坐标刷成空白
-			static uint16_t last_touch_x = 0;
-			if (last_touch_x !=999 && CTP.ctpxy.ctp_x ==999)
-			{
-				LCD_ShowStr(0, 1, WHITE, BLACK, "       ", 16);
-			}
 			
 			// 点击标题后显示
 			if (ScanKey_Title())
@@ -204,15 +222,24 @@ int main(void)
 				LCD_ShowStr(35, 106, BLACK, LIGHTGRAY, "制作人：甄益凡", 16);
 				LCD_ShowStr(35, 130, BLACK, LIGHTGRAY, "专  业：电子信息工程", 16);
 				LCD_ShowStr(35, 154, BLACK, LIGHTGRAY, "学  号：15160200314", 16);
-				LCD_ShowStr(35, 178, BLACK, LIGHTGRAY, "日  期：2019年5月20日", 16);
+				
 				
 				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, " 返  回 ", 24);
 				while (!ScanKey_Begin())  // 等待按下返回
 				{
 					Updata_BatIco();
+					Updata_Time();
+					char str[30] = {0};
+					HAL_RTC_GetDate(&hrtc, &Date, RTC_FORMAT_BIN);
+					sprintf(str, "日  期：20%02d年%02d月%02d日", Date.Year, Date.Month, Date.Date);
+					LCD_ShowStr(35, 178, BLACK, LIGHTGRAY, str, 16);
+					HAL_RTC_GetTime(&hrtc, &Time, RTC_FORMAT_BIN);
+					sprintf(str, "时  间：%02d时%02d分%02d秒", Time.Hours, Time.Minutes, Time.Seconds);
+					LCD_ShowStr(35, 202, BLACK, LIGHTGRAY, str, 16);
 				}
-				LCD_Fill(0, 20, 240, 270, WHITE);
-				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
+				goto begin;
+//				LCD_Fill(0, 20, 240, 270, WHITE);
+//				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
 			
 			// 点击电池后显示
@@ -229,6 +256,7 @@ int main(void)
 				while (!ScanKey_Begin())  // 等待按下返回
 				{
 					Updata_BatIco();
+					Updata_Time();
 					LCD_ShowStr(60, 126, BLACK, LIGHTGRAY, "电池电压：3.73V", 16);
 					LCD_ShowStr(60, 146, BLACK, LIGHTGRAY, "截止电压：3.20V", 16);
 					if (charge_state)
@@ -236,8 +264,9 @@ int main(void)
 					else
 						LCD_ShowStr(60, 166, BLACK, LIGHTGRAY, "电池状态：放电中", 16);
 				}
-				LCD_Fill(0, 20, 240, 270, WHITE);
-				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
+				goto begin;
+//				LCD_Fill(0, 20, 240, 270, WHITE);
+//				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
 		}
 	}
@@ -252,13 +281,15 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
   /**Initializes the CPU, AHB and APB busses clocks 
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
   RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
@@ -276,6 +307,13 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RTC|RCC_PERIPHCLK_ADC;
+  PeriphClkInit.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+  PeriphClkInit.AdcClockSelection = RCC_ADCPCLK2_DIV6;
+  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK)
   {
     Error_Handler();
   }

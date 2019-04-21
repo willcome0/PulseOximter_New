@@ -8,7 +8,7 @@
 
 uint8_t ScanKey_Begin(void);
 uint8_t ScanKey_Title(void);
-
+uint8_t ScanKey_Bat(void);
 
 
 

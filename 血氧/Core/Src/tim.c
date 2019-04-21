@@ -42,6 +42,7 @@
 
 /* USER CODE BEGIN 0 */
 #include "FT6206.h"
+#include "lcd.h"
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -247,6 +248,8 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			charge_state = 1;
 		else
 			charge_state = 0;
+
+		
 		
 		ReadCTP(&CTP);
 //		g_INT = 1;

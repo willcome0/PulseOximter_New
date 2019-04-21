@@ -21,7 +21,7 @@ uint8_t ScanKey_Title(void)
 {
 	// ´¥Ãş±êÌâ
 	if (70 < CTP.ctpxy.ctp_x && CTP.ctpxy.ctp_x < 170 &&
-		0 < CTP.ctpxy.ctp_y && CTP.ctpxy.ctp_y < 22)
+		0 < CTP.ctpxy.ctp_y && CTP.ctpxy.ctp_y < 25)
 	{
 		return 1;
 	}
@@ -31,7 +31,19 @@ uint8_t ScanKey_Title(void)
 	}
 }
 
-
+uint8_t ScanKey_Bat(void)
+{
+	// ´¥Ãşµç³Ø
+	if (187 < CTP.ctpxy.ctp_x && CTP.ctpxy.ctp_x < 240 &&
+		0 < CTP.ctpxy.ctp_y && CTP.ctpxy.ctp_y < 25)
+	{
+		return 1;
+	}
+	else
+	{
+		return 0;
+	}
+}
 
 
 

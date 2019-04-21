@@ -248,7 +248,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		else
 			charge_state = 0;
 		
-//		ReadCTP(&CTP);
+		ReadCTP(&CTP);
 //		g_INT = 1;
 	}
 }

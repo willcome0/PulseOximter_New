@@ -54,6 +54,7 @@
 #include <math.h>
 #include "max30102.h"
 #include "myiic.h"
+#include "key.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -155,13 +156,16 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-
-		Max30102_Measure();
+		uint8_t touch_title = 0;
+		uint8_t touch_bat = 0;
+		
+//		Max30102_Measure();
 		while (1)
 		{
-			char str[30];
-			sprintf(str, "%3d %3d", 999, CTP.ctpxy.ctp_y);
-			LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
+
+			
+			
+			// 显示充电标识
 			if (last_charge_state != charge_state)
 			{
 				last_charge_state = charge_state;
@@ -169,6 +173,40 @@ int main(void)
 					LCD_ShowStr(187, 1, WHITE, BLACK, "電", 16);
 				else
 					LCD_ShowStr(187, 1, WHITE, BLACK, "箜", 16);
+			}
+			
+			// 显示触摸坐标
+			if (CTP.ctpxy.ctp_x != 999 && CTP.ctpxy.ctp_y != 999)
+			{
+				char str[30];
+//				sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, CTP.ctpxy.ctp_y);
+//				LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
+	
+			}
+			
+			// 不再触摸，把坐标刷成空白
+			static uint16_t last_touch_x = 0;
+			if (last_touch_x !=999 && CTP.ctpxy.ctp_x ==999)
+			{
+				LCD_ShowStr(0, 1, WHITE, BLACK, "       ", 16);
+			}
+			
+			// 点击标题后显示
+			if (ScanKey_Title())
+			{
+				LCD_Fill(20, 60, 220, 240, LIGHTGRAY); // 窗体
+				LCD_Fill(20, 60, 220, 80, DARKBLUE);   // 窗头
+				LCD_ShowStr(88, 62,  WHITE, DARKBLUE, "毕设关于", 16);
+				
+				LCD_ShowStr(35, 106,  BLACK, LIGHTGRAY, "制作人：甄益凡", 16);
+				LCD_ShowStr(35, 126, BLACK, LIGHTGRAY, "专  业：电子信息工程", 16);
+				LCD_ShowStr(35, 146, BLACK, LIGHTGRAY, "学  号：15160200314", 16);
+				LCD_ShowStr(35, 166, BLACK, LIGHTGRAY, "日  期：2019年5月20日", 16);
+				
+				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, " 返  回 ", 24);
+				while (!ScanKey_Begin()); // 等待按下返回
+				LCD_Fill(0, 20, 240, 270, WHITE);
+				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
 		}
 	}
@@ -213,6 +251,8 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+
 
 /* USER CODE END 4 */
 

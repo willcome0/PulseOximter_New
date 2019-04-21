@@ -28,7 +28,7 @@ enum DataType{CMD=0, DATA};
 #define LIGHTBLUE      	 0X7D7C	//浅蓝色  
 #define GRAYBLUE       	 0X5458 //灰蓝色
 #define LIGHTGREEN     	 0X841F //浅绿色
-//#define LIGHTGRAY        0XEF5B //浅灰色(PANNEL)
+#define LIGHTGRAY        0XEF5B //浅灰色(PANNEL)
 #define LGRAY 			 0XC618 //浅灰色(PANNEL),窗体背景色
 
 #define LGRAYBLUE        0XA651 //浅灰蓝色(中间层颜色)

@@ -9,6 +9,7 @@ uint8_t max30102_Bus_Write(uint8_t Register_Address, uint8_t Word_Data)
 	/* 采用串行EEPROM随即读取指令序列，连续读取若干字节 */
 
 	/* 第1步：发起I2C总线启动信号 */
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	IIC_Start();
 
 	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
@@ -38,11 +39,13 @@ uint8_t max30102_Bus_Write(uint8_t Register_Address, uint8_t Word_Data)
 
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 	return 1;	/* 执行成功 */
 
 cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 	return 0;
 }
 
@@ -54,6 +57,7 @@ uint8_t max30102_Bus_Read(uint8_t Register_Address)
 
 
 	/* 第1步：发起I2C总线启动信号 */
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	IIC_Start();
 
 	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
@@ -93,11 +97,13 @@ uint8_t max30102_Bus_Read(uint8_t Register_Address)
 	}
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 	return data;	/* 执行成功 返回data值 */
 
 cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 	return 0;
 }
 
@@ -108,6 +114,7 @@ void max30102_FIFO_ReadWords(uint8_t Register_Address,uint16_t Word_Data[][2],ui
 	uint8_t no = count;
 	uint8_t data1, data2;
 	/* 第1步：发起I2C总线启动信号 */
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	IIC_Start();
 
 	/* 第2步：发起控制字节，高7bit是地址，bit0是读写控制位，0表示写，1表示读 */
@@ -163,14 +170,17 @@ void max30102_FIFO_ReadWords(uint8_t Register_Address,uint16_t Word_Data[][2],ui
 	}
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 
 cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 }
 
 void max30102_FIFO_ReadBytes(uint8_t Register_Address,uint8_t* Data)
 {	
+	NVIC_DisableIRQ(TIM1_UP_IRQn);
 	max30102_Bus_Read(REG_INTR_STATUS_1);
 	max30102_Bus_Read(REG_INTR_STATUS_2);
 	
@@ -216,10 +226,12 @@ void max30102_FIFO_ReadBytes(uint8_t Register_Address,uint8_t* Data)
 	/* 最后1个字节读完后，CPU产生NACK信号(驱动SDA = 1) */
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 
 cmd_fail: /* 命令执行失败后，切记发送停止信号，避免影响I2C总线上其他设备 */
 	/* 发送I2C总线停止信号 */
 	IIC_Stop();
+	NVIC_EnableIRQ(TIM1_UP_IRQn);
 
 //	uint8_t i;
 //	uint8_t fifo_wr_ptr;
@@ -421,7 +433,10 @@ void Max30102_Measure(void)
     {
         while(HAL_GPIO_ReadPin(INT_GPIO_Port, INT_Pin)==1);   //wait until the interrupt pin asserts
         
+		/*********************读取血氧原始数据****************************/
 		max30102_FIFO_ReadBytes(REG_FIFO_DATA, temp); // 读取数据
+		/*************************************************/
+		
 		aun_red_buffer[i] = (long)((long)((long)temp[0]&0x03)<<16) | (long)temp[1]<<8 | (long)temp[2];    // Combine values to get the actual number
 		aun_ir_buffer[i]  = (long)((long)((long)temp[3] & 0x03)<<16) |(long)temp[4]<<8 | (long)temp[5];   // Combine values to get the actual number
             
@@ -442,10 +457,12 @@ void Max30102_Measure(void)
     }
 	un_prev_data=aun_red_buffer[i];
 	//calculate heart rate and SpO2 after first 500 samples (first 5 seconds of samples)
+	/*********************用血氧原始数据算出实际的血氧浓度和心跳****************************/
     maxim_heart_rate_and_oxygen_saturation(aun_ir_buffer, n_ir_buffer_length, aun_red_buffer, &n_sp02, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid); 
+	/*************************************************/
 	
 	//////////////////////////////////////
-//	while (1) // 测一次或多次
+	while (1) // 测一次或多次
 	{
 	/* USER CODE END WHILE */
 
@@ -511,7 +528,7 @@ void Max30102_Measure(void)
 //				dis_hr = 0;
 //				dis_spo2 = n_sp02;
 //			}
-			
+			printf("%6d  %6d\r\n", aun_red_buffer[i], aun_ir_buffer[i]); 
 		}
         maxim_heart_rate_and_oxygen_saturation(aun_ir_buffer, n_ir_buffer_length, aun_red_buffer, &n_sp02, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid);
 		printf("B%4d  S%4d\r\n", n_heart_rate, n_sp02); 

@@ -242,15 +242,16 @@ uint8_t charge_state = 0;
 uint8_t last_charge_state = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
+	// 定时器1中断，10ms一次
 	if (htim->Instance == TIM1)
 	{
+		// 获取电池充电状态
 		if (HAL_GPIO_ReadPin(CHARGE_GPIO_Port, CHARGE_Pin) == GPIO_PIN_RESET)
 			charge_state = 1;
 		else
 			charge_state = 0;
 
-		
-		
+		// 获取触摸屏触摸坐标
 		ReadCTP(&CTP);
 //		g_INT = 1;
 	}

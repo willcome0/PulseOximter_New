@@ -394,41 +394,6 @@
           <GroupName>Application/User/Core</GroupName>
           <Files>
             <File>
-              <FileName>LCD.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\LCD.c</FilePath>
-            </File>
-            <File>
-              <FileName>FT6206.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\FT6206.c</FilePath>
-            </File>
-            <File>
-              <FileName>FT6206.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>..\Core\My\FT6206.h</FilePath>
-            </File>
-            <File>
-              <FileName>algorithm.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\algorithm.c</FilePath>
-            </File>
-            <File>
-              <FileName>max30102.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\max30102.c</FilePath>
-            </File>
-            <File>
-              <FileName>myiic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\myiic.c</FilePath>
-            </File>
-            <File>
-              <FileName>key.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\Core\My\key.c</FilePath>
-            </File>
-            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>../Core/Src/main.c</FilePath>
@@ -473,10 +438,37 @@
               <FileType>1</FileType>
               <FilePath>../Core/Src/stm32f1xx_hal_msp.c</FilePath>
             </File>
+            <File>
+              <FileName>key.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\key.c</FilePath>
+            </File>
+            <File>
+              <FileName>LCD.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\LCD.c</FilePath>
+            </File>
+            <File>
+              <FileName>max30102.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\max30102.c</FilePath>
+            </File>
+            <File>
+              <FileName>FT6206.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\FT6206.c</FilePath>
+            </File>
+            <File>
+              <FileName>algorithm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\algorithm.c</FilePath>
+            </File>
+            <File>
+              <FileName>myiic.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\My\myiic.c</FilePath>
+            </File>
           </Files>
-        </Group>
-        <Group>
-          <GroupName>My</GroupName>
         </Group>
         <Group>
           <GroupName>Drivers/STM32F1xx_HAL_Driver</GroupName>

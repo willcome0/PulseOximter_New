@@ -4,6 +4,7 @@
 
 struTouch CTP;
 
+/*****************读取触摸屏寄存器值********************************/
 uint8_t FT6206_Read_Reg(uint8_t *pbuf,uint32_t len)
 {
     int8_t i=0;
@@ -32,6 +33,8 @@ uint8_t FT6206_Read_Reg(uint8_t *pbuf,uint32_t len)
 #define X_MAX_PIXEL         240
 #define Y_MAX_PIXEL         320
 static struTouch  ctplast={0,0,NO_TOUCH,X_NO_MOVING,Y_NO_MOVING,};
+
+/*****************读取触摸屏触摸坐标值********************************/
 void  ReadCTP(struTouch *nowctp)
 {
     uint8_t    ctpbuf[10];
@@ -110,43 +113,45 @@ void  ReadCTP(struTouch *nowctp)
 //        nowctp->dy = 0;
 //    }
 }
-void  Get_Test_Val(struTouch  nowctp, uint16_t *val_x, uint16_t *val_y)
-{
-    int    tmp;
 
-    if(nowctp.ctpmainstatus == TOUCHED)
-    {    
-        tmp  = (int)(*val_x);
-        tmp += nowctp.dx;          // 向右移动，加/移动差值/ ; 向左移动,减/移动差值/
-        if(tmp < 0) tmp = 65535;
-        if(tmp > 65535) tmp = 0;
-        *val_x = (uint16_t)tmp;
-        
-        tmp  = (int)(*val_y);
-        tmp -= nowctp.dy;          // 向上移动，加/移动差值/ ; 向下移动,减/移动差值/
-        if(tmp < 0) tmp = 65535;
-        if(tmp > 65535) tmp = 0;
-        *val_y = (uint16_t)tmp;
-    }
-}
-void Touch_Test(struTouch  nowctp)
-{
-	if(nowctp.ctpmainstatus == JUST_POP)
-    {    
-        
-    }
-}
 
-typedef  enum{
-    FALSE = 0,
-    TRUE  = !FALSE,
-}BOOL;
+//void  Get_Test_Val(struTouch  nowctp, uint16_t *val_x, uint16_t *val_y)
+//{
+//    int    tmp;
 
-BOOL is_touch_area(struTouch  nowctp,uint16_t x,uint16_t y,uint16_t w,uint16_t h,uint16_t margin)
-{
-	return (BOOL)(nowctp.ctpmainstatus == TOUCHED 
-		&& nowctp.ctpxy.ctp_x >= x - margin 
-		&& nowctp.ctpxy.ctp_x <= x + w + margin 
-		&& nowctp.ctpxy.ctp_y >= y - margin 
-		&& nowctp.ctpxy.ctp_y <= y + h + margin);
-}
+//    if(nowctp.ctpmainstatus == TOUCHED)
+//    {    
+//        tmp  = (int)(*val_x);
+//        tmp += nowctp.dx;          // 向右移动，加/移动差值/ ; 向左移动,减/移动差值/
+//        if(tmp < 0) tmp = 65535;
+//        if(tmp > 65535) tmp = 0;
+//        *val_x = (uint16_t)tmp;
+//        
+//        tmp  = (int)(*val_y);
+//        tmp -= nowctp.dy;          // 向上移动，加/移动差值/ ; 向下移动,减/移动差值/
+//        if(tmp < 0) tmp = 65535;
+//        if(tmp > 65535) tmp = 0;
+//        *val_y = (uint16_t)tmp;
+//    }
+//}
+//void Touch_Test(struTouch  nowctp)
+//{
+//	if(nowctp.ctpmainstatus == JUST_POP)
+//    {    
+//        
+//    }
+//}
+
+//typedef  enum{
+//    FALSE = 0,
+//    TRUE  = !FALSE,
+//}BOOL;
+
+//BOOL is_touch_area(struTouch  nowctp,uint16_t x,uint16_t y,uint16_t w,uint16_t h,uint16_t margin)
+//{
+//	return (BOOL)(nowctp.ctpmainstatus == TOUCHED 
+//		&& nowctp.ctpxy.ctp_x >= x - margin 
+//		&& nowctp.ctpxy.ctp_x <= x + w + margin 
+//		&& nowctp.ctpxy.ctp_y >= y - margin 
+//		&& nowctp.ctpxy.ctp_y <= y + h + margin);
+//}

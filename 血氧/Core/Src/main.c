@@ -177,15 +177,17 @@ begin: ;
 	LCD_Fill(65, 268, 175, 306, GRAYBLUE);
 	LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 	
-	LCD_Fill(0, 110, 240, 174, LGRAYBLUE);
+	/********************心率界面结果区域*******************************/
+	LCD_Fill(0, 110, 240, 174, LGRAYBLUE); // 画背景区域
 	LCD_ShowStr(5, 115, BLACK, LGRAYBLUE, "心率: --次/min ", 24);
 	LCD_ShowStr(5, 145, BLACK, LGRAYBLUE, "血氧浓度: ---%", 24);
-	LCD_ShowPic_Heart(1);
+	LCD_ShowPic_Heart(1); // 显示心跳图片
 	
-	LCD_DrawLine(4, 24, 4, 100, BLACK);
+	LCD_DrawLine(4, 24, 4, 100, BLACK); // 画线
 	LCD_DrawLine(5, 24, 5, 100, BLACK);
 	LCD_DrawLine(2, 97, 238, 97, BLACK);
 	LCD_DrawLine(2, 98, 238, 98, BLACK);
+	/******************************************************************/
 	last_seconds = 66;
 	while (1) // 测一次或多次
 	{
@@ -193,25 +195,25 @@ begin: ;
 
     /* USER CODE BEGIN 3 */
 		
-//		Max30102_Measure();
+		Max30102_Measure();
 		while (1)
 		{
 
 
 			// 显示充电标识
 			Updata_BatIco();
+			// 更新时间显示
 			Updata_Time();
 			
 			// 显示触摸坐标
-			if (CTP.ctpxy.ctp_x != 999 && CTP.ctpxy.ctp_y != 999)
-			{
+//			if (CTP.ctpxy.ctp_x != 999 && CTP.ctpxy.ctp_y != 999)
+//			{
 //				char str[30];
 //				sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, CTP.ctpxy.ctp_y);
 //				LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
-	
-			}
+//			}
 			
-			
+			/*********************************************/
 			// 点击标题后显示
 			if (ScanKey_Title())
 			{
@@ -241,8 +243,10 @@ begin: ;
 //				LCD_Fill(0, 20, 240, 270, WHITE);
 //				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
+			/*********************************************/
 			
-			// 点击电池后显示
+			/*********************************************/
+			// 点击电池图标后显示电池信息
 			if (ScanKey_Bat())
 			{
 				LCD_Fill(35, 60, 205, 240, LIGHTGRAY); // 窗体
@@ -268,6 +272,7 @@ begin: ;
 //				LCD_Fill(0, 20, 240, 270, WHITE);
 //				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
+			/*********************************************/
 		}
 	}
   /* USER CODE END 3 */

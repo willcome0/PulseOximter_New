@@ -60,6 +60,7 @@ void LCD_DrawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t c
 void LCD_DrawRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2, uint16_t color);
 void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color);
 
+void LCD_ShowNum(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint32_t num, uint8_t len, uint8_t size, uint8_t add);
 void LCD_ShowFontEN(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, char num, uint8_t size);
 void LCD_ShowFontZH(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, char *s, uint8_t size);
 void LCD_ShowStr(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, char *str, uint8_t size);

@@ -325,6 +325,39 @@ void LCD_DrawCircle(uint16_t x0, uint16_t y0, uint8_t r, uint16_t color)
     }
 }
 
+static uint32_t LCD_Pow(uint8_t m, uint8_t n)
+{
+    uint32_t result = 1;
+
+    while(n--)result *= m;
+
+    return result;
+}
+
+void LCD_ShowNum(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint32_t num, uint8_t len, uint8_t size, uint8_t add)
+{
+    uint8_t enshow = 0;
+
+    for(uint8_t t = 0; t < len; t++)
+    {
+        uint8_t temp = (num / LCD_Pow(10, len - t - 1)) % 10;
+
+        if(enshow == 0 && t < (len - 1))
+        {
+            if(temp == 0)
+            {
+                LCD_ShowFontEN(x + (size / 2)*t, y, fc, bc, add, size);
+                continue;
+            }
+
+            else enshow = 1;
+        }
+
+		LCD_ShowFontEN(x + (size / 2)*t, y, fc, bc, temp + '0', size);
+    }
+}
+
+
 uint8_t CoverFlag = 1;
 void LCD_ShowFontEN(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, char num, uint8_t size)
 {

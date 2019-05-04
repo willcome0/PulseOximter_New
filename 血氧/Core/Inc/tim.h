@@ -65,6 +65,7 @@ void MX_TIM3_Init(void);
 /* USER CODE BEGIN Prototypes */
 extern uint8_t charge_state;
 extern uint8_t last_charge_state;
+extern uint16_t adc_value;
 
 void delay_us(uint16_t us);
 /* USER CODE END Prototypes */

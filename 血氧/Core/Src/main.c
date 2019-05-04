@@ -88,6 +88,19 @@ void Updata_BatIco(void)
 		else
 			LCD_ShowStr(187, 1, WHITE, BLACK, "箜", 16);
 	}
+
+	uint16_t bat = (float)adc_value*0.161;
+	
+	if (bat > 390)
+		LCD_ShowBat(210, 4, 4);
+	else if (bat > 376)
+		LCD_ShowBat(210, 4, 3);
+	else if (bat > 367)
+		LCD_ShowBat(210, 4, 2);
+	else if (bat > 350)
+		LCD_ShowBat(210, 4, 1);
+	else
+		LCD_ShowBat(210, 4, 0);
 }
 
 void Updata_Time(void)
@@ -101,6 +114,61 @@ void Updata_Time(void)
 		LCD_ShowStr(0, 2, WHITE, BLACK, str, 16);
 	}
 }
+
+void Show_ScreenCloseTime(uint8_t time)
+{
+	LCD_ShowStr(133, 135, BLACK, LIGHTGRAY, "     ", 24);
+	switch (time)
+	{
+		case 1:
+			LCD_ShowStr(139, 135, BLACK, LIGHTGRAY, "30秒", 24);
+			break;
+		case 2:
+			LCD_ShowStr(139, 135, BLACK, LIGHTGRAY, "60秒", 24);
+			break;
+		case 3:
+			LCD_ShowStr(133, 135, BLACK, LIGHTGRAY, "100秒", 24);
+			break;
+		case 4:
+			LCD_ShowStr(133, 135, BLACK, LIGHTGRAY, "200秒", 24);
+			break;
+		case 5:
+			LCD_ShowStr(133, 135, BLACK, LIGHTGRAY, "500秒", 24);
+			break;
+		case 6:
+			LCD_ShowStr(139, 135, BLACK, LIGHTGRAY, "永不", 24);
+			break;
+		default: break;
+	}
+}
+
+void Show_TurnOffTime(uint8_t time)
+{
+	LCD_ShowStr(133, 170, BLACK, LIGHTGRAY, "     ", 24);
+	switch (time)
+	{
+		case 1:
+			LCD_ShowStr(139, 170, BLACK, LIGHTGRAY, "30秒", 24);
+			break;
+		case 2:
+			LCD_ShowStr(139, 170, BLACK, LIGHTGRAY, "60秒", 24);
+			break;
+		case 3:
+			LCD_ShowStr(133, 170, BLACK, LIGHTGRAY, "100秒", 24);
+			break;
+		case 4:
+			LCD_ShowStr(133, 170, BLACK, LIGHTGRAY, "200秒", 24);
+			break;
+		case 5:
+			LCD_ShowStr(133, 170, BLACK, LIGHTGRAY, "500秒", 24);
+			break;
+		case 6:
+			LCD_ShowStr(139, 170, BLACK, LIGHTGRAY, "永不", 24);
+			break;
+		default: break;
+	}
+}
+	
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -172,10 +240,16 @@ int main(void)
 begin: ;
 	LCD_Clear(WHITE);
 	LCD_Fill(0, 0, 240, 18, BLACK);
-	LCD_ShowBat(210, 4, 4);
 	LCD_ShowStr(80, 1, WHITE, BLACK, "血氧检测仪", 16);
+	
+	/********************绘制"开始检测"按键*******************************/
 	LCD_Fill(65, 268, 175, 306, GRAYBLUE);
 	LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
+	
+	/********************绘制"设置"按键*******************************/
+	LCD_Fill(214, 262, 240, 320, GRAYBLUE);
+	LCD_ShowStr(220, 271, WHITE, GRAYBLUE, "设", 16);
+	LCD_ShowStr(220, 295, WHITE, GRAYBLUE, "置", 16);
 	
 	/********************心率界面结果区域*******************************/
 	LCD_Fill(0, 110, 240, 174, LGRAYBLUE); // 画背景区域
@@ -195,11 +269,11 @@ begin: ;
 
     /* USER CODE BEGIN 3 */
 		
-		Max30102_Measure();
+//		Max30102_Measure();
 		while (1)
 		{
 
-
+		
 			// 显示充电标识
 			Updata_BatIco();
 			// 更新时间显示
@@ -207,14 +281,23 @@ begin: ;
 			
 			// 显示触摸坐标
 //			if (CTP.ctpxy.ctp_x != 999 && CTP.ctpxy.ctp_y != 999)
-//			{
-//				char str[30];
-//				sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, CTP.ctpxy.ctp_y);
-//				LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
-//			}
+			{
+				char str[30];
+				sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, adc_value);
+				LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
+			}
 			
-			/*********************************************/
-			// 点击标题后显示
+			/***********点击"开始检测"**********************************/
+			if (ScanKey_Begin())
+			{
+				LCD_Fill(65, 268, 175, 306, BRRED);
+				LCD_ShowStr(72, 275, WHITE, BRRED, "正在检测", 24);
+				Max30102_Measure();
+				LCD_Fill(65, 268, 175, 306, GRAYBLUE);
+				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
+			}
+			
+			/***********点击标题后显示**********************************/
 			if (ScanKey_Title())
 			{
 				LCD_Fill(20, 60, 220, 240, LIGHTGRAY); // 窗体
@@ -243,10 +326,9 @@ begin: ;
 //				LCD_Fill(0, 20, 240, 270, WHITE);
 //				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
-			/*********************************************/
+			/*********点击标题后显示 结束************************************/
 			
-			/*********************************************/
-			// 点击电池图标后显示电池信息
+			/*********点击电池图标后显示电池信息************************************/
 			if (ScanKey_Bat())
 			{
 				LCD_Fill(35, 60, 205, 240, LIGHTGRAY); // 窗体
@@ -261,18 +343,148 @@ begin: ;
 				{
 					Updata_BatIco();
 					Updata_Time();
-					LCD_ShowStr(60, 126, BLACK, LIGHTGRAY, "电池电压：3.73V", 16);
-					LCD_ShowStr(60, 146, BLACK, LIGHTGRAY, "截止电压：3.20V", 16);
+					
+					char str[30];
+					sprintf(str, "电池电压：%1.2fV", (float)adc_value*0.00161);
+					LCD_ShowStr(60, 130, BLACK, LIGHTGRAY, str, 16);
+
+					LCD_ShowStr(60, 154, BLACK, LIGHTGRAY, "截止电压：3.20V", 16);
 					if (charge_state)
-						LCD_ShowStr(60, 166, BLACK, LIGHTGRAY, "电池状态：充电中", 16);
+						LCD_ShowStr(60, 178, BLACK, LIGHTGRAY, "电池状态：充电中", 16);
 					else
-						LCD_ShowStr(60, 166, BLACK, LIGHTGRAY, "电池状态：放电中", 16);
+						LCD_ShowStr(60, 178, BLACK, LIGHTGRAY, "电池状态：放电中", 16);
 				}
 				goto begin;
 //				LCD_Fill(0, 20, 240, 270, WHITE);
 //				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
-			/*********************************************/
+			/**********点击电池图标 结束***********************************/
+			
+			/**********点击设置后显示***********************************/
+			if (ScanKey_Set())
+			{
+				LCD_Fill(20, 60, 220, 240, LIGHTGRAY); // 窗体
+				LCD_Fill(20, 60, 220, 80, DARKBLUE);   // 窗头
+				LCD_ShowStr(88, 62,  WHITE, DARKBLUE, "  设置  ", 16);
+				
+				LCD_ShowStr(35, 105, BLACK, LIGHTGRAY, "亮度调节：", 16);
+				LCD_ShowStr(35, 140, BLACK, LIGHTGRAY, "自动息屏：", 16);
+				LCD_ShowStr(35, 175, BLACK, LIGHTGRAY, "自动关机：", 16);
+				
+				LCD_Fill(115-5, 105-5, 115+8+5, 105+16+5, GRAYBLUE);
+				LCD_ShowStr(115, 105, WHITE, GRAYBLUE, "-", 16);
+				LCD_Fill(165-5, 105-5, 165+8+5, 105+16+5, GRAYBLUE);
+				LCD_ShowStr(165, 105, LIGHTGRAY, GRAYBLUE, "+", 16);
+				
+				LCD_Fill(115-5, 140-5, 115+8+5, 140+16+5, GRAYBLUE);
+				LCD_ShowStr(115, 140, WHITE, GRAYBLUE, "-", 16);
+				LCD_Fill(202-5, 140-5, 202+8+5, 140+16+5, GRAYBLUE);
+				LCD_ShowStr(202, 140, LIGHTGRAY, GRAYBLUE, "+", 16);
+				
+				LCD_Fill(115-5, 175-5, 115+8+5, 175+16+5, GRAYBLUE);
+				LCD_ShowStr(115, 175, WHITE, GRAYBLUE, "-", 16);
+				LCD_Fill(202-5, 175-5, 202+8+5, 175+16+5, GRAYBLUE);
+				LCD_ShowStr(202, 175, LIGHTGRAY, GRAYBLUE, "+", 16);
+				
+				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, " 返  回 ", 24);
+				
+				
+				int8_t Light_Num = 1;
+				int8_t ScreenClose_Time = 3;
+				int8_t TurnOff_Time = 5;
+				
+				LCD_ShowNum(139, 100, BLACK, LIGHTGRAY, Light_Num, 1, 24, ' ');
+				Show_ScreenCloseTime(ScreenClose_Time);
+				Show_TurnOffTime(TurnOff_Time);
+				
+				while (!ScanKey_Begin())  // 等待按下返回
+				{
+					Updata_BatIco();
+					Updata_Time();
+					
+					/**************控制亮度********************/
+					if (ScanKey_LightAdd()) // 按下亮度增
+					{
+						if (Light_Num >= 9)
+						{
+							Light_Num = 9;
+						}
+						else
+						{
+							LCD_ShowNum(139, 100, BLACK, LIGHTGRAY, ++Light_Num, 1, 24, ' ');
+							while (ScanKey_LightAdd()); // 等待按键松开
+						}
+					}
+					if (ScanKey_LightSub()) // 按下亮度减
+					{
+						if (Light_Num <= 1)
+						{
+							Light_Num = 1;
+						}
+						else
+						{
+							LCD_ShowNum(139, 100, BLACK, LIGHTGRAY, --Light_Num, 1, 24, ' ');
+							while (ScanKey_LightSub()); // 等待按键松开
+						}
+					}
+					
+					// 息屏时间一共分：30、60、100、200、500秒、永不
+					if (ScanKey_ScreenCloseAdd())	// 按下息屏时间增
+					{
+						if (ScreenClose_Time >= 6)
+						{
+							ScreenClose_Time = 6;
+						}
+						else
+						{
+							Show_ScreenCloseTime(++ScreenClose_Time);
+							while (ScanKey_ScreenCloseAdd()); // 等待按键松开
+						}
+					}
+					if (ScanKey_ScreenCloseSub())	// 按下息屏时间减
+					{
+						if (ScreenClose_Time <= 1)
+						{
+							ScreenClose_Time = 1;
+						}
+						else
+						{
+							Show_ScreenCloseTime(--ScreenClose_Time);
+							while (ScanKey_ScreenCloseSub()); // 等待按键松开
+						}
+					}
+					
+					// 关机时间分：30、60、100、200、500秒、永不
+					if (ScanKey_TurnOffAdd())	// 按下息屏时间增
+					{
+						if (TurnOff_Time >= 6)
+						{
+							TurnOff_Time = 6;
+						}
+						else
+						{
+							Show_TurnOffTime(++TurnOff_Time);
+							while (ScanKey_TurnOffAdd()); // 等待按键松开
+						}
+					}
+					if (ScanKey_TurnOffSub())	// 按下息屏时间减
+					{
+						if (TurnOff_Time <= 1)
+						{
+							TurnOff_Time = 1;
+						}
+						else
+						{
+							Show_TurnOffTime(--TurnOff_Time);
+							while (ScanKey_TurnOffSub()); // 等待按键松开
+						}
+					}
+					
+					/******************************************/
+				}
+				goto begin;
+			}
+			/****************点击设置 结束*****************************/
 		}
 	}
   /* USER CODE END 3 */

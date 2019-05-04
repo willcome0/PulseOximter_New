@@ -43,6 +43,7 @@
 /* USER CODE BEGIN 0 */
 #include "FT6206.h"
 #include "lcd.h"
+#include "adc.h"
 /* USER CODE END 0 */
 
 TIM_HandleTypeDef htim1;
@@ -240,6 +241,8 @@ void delay_us(uint16_t us)
 uint8_t g_INT = 0;
 uint8_t charge_state = 0;
 uint8_t last_charge_state = 0;
+static uint16_t adc_count = 0;
+uint16_t adc_value = 0;
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
 	// 定时器1中断，10ms一次
@@ -254,6 +257,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		// 获取触摸屏触摸坐标
 		ReadCTP(&CTP);
 //		g_INT = 1;
+	}
+	if (adc_count++ > 100)
+	{
+		adc_count = 0;
+		HAL_ADC_Start(&hadc1);
+		HAL_ADC_PollForConversion(&hadc1,0xFFFF);
+		adc_value = HAL_ADC_GetValue(&hadc1);
 	}
 }
 

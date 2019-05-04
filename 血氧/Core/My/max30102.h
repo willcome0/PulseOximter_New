@@ -40,6 +40,9 @@
 #define REG_REV_ID 0xFE
 #define REG_PART_ID 0xFF
 
+extern int32_t HeartRate_Value;
+extern int32_t SP02_Value;
+
 void max30102_init(void);  
 void max30102_reset(void);
 uint8_t max30102_Bus_Write(uint8_t Register_Address, uint8_t Word_Data);

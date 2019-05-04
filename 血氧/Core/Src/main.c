@@ -253,8 +253,8 @@ begin: ;
 	
 	/********************心率界面结果区域*******************************/
 	LCD_Fill(0, 110, 240, 174, LGRAYBLUE); // 画背景区域
-	LCD_ShowStr(5, 115, BLACK, LGRAYBLUE, "心率: --次/min ", 24);
-	LCD_ShowStr(5, 145, BLACK, LGRAYBLUE, "血氧浓度: ---%", 24);
+	LCD_ShowStr(5, 115, BLACK, LGRAYBLUE, "心率:    次/min ", 24);
+	LCD_ShowStr(5, 145, BLACK, LGRAYBLUE, "血氧浓度:    %", 24);
 	LCD_ShowPic_Heart(1); // 显示心跳图片
 	
 	LCD_DrawLine(4, 24, 4, 100, BLACK); // 画线
@@ -268,8 +268,6 @@ begin: ;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		
-//		Max30102_Measure();
 		while (1)
 		{
 
@@ -292,7 +290,15 @@ begin: ;
 			{
 				LCD_Fill(65, 268, 175, 306, BRRED);
 				LCD_ShowStr(72, 275, WHITE, BRRED, "正在检测", 24);
+				LCD_Fill(6, 25, 239, 96, WHITE);
+				
 				Max30102_Measure();
+				
+				LCD_ShowNum(77, 115, BLACK, LGRAYBLUE, HeartRate_Value, 3, 24, ' ');
+				LCD_ShowNum(122, 145, BLACK, LGRAYBLUE, SP02_Value, 3, 24, ' ');
+				
+//				LCD_ShowStr(77, 115, BLACK, LGRAYBLUE, "999", 24);
+//				LCD_ShowStr(122, 145, BLACK, LGRAYBLUE, "999", 24);
 				LCD_Fill(65, 268, 175, 306, GRAYBLUE);
 				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}

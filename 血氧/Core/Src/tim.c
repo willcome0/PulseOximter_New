@@ -255,16 +255,19 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 			charge_state = 0;
 
 		// »ñÈ¡´¥ÃþÆÁ´¥Ãþ×ø±ê
+		
 		ReadCTP(&CTP);
 //		g_INT = 1;
+		
+		if (adc_count++ > 100)
+		{
+			adc_count = 0;
+			HAL_ADC_Start(&hadc1);
+			HAL_ADC_PollForConversion(&hadc1,0xFFFF);
+			adc_value = HAL_ADC_GetValue(&hadc1);
+		}
 	}
-	if (adc_count++ > 100)
-	{
-		adc_count = 0;
-		HAL_ADC_Start(&hadc1);
-		HAL_ADC_PollForConversion(&hadc1,0xFFFF);
-		adc_value = HAL_ADC_GetValue(&hadc1);
-	}
+
 }
 
 /* USER CODE END 1 */

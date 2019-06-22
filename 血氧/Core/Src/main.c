@@ -78,6 +78,37 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
+//#define WK_FLASH_SIZE          128                                         // flash大小（KB）
+//#define WK_FLASH_PAGE_SIZE     2                                           // 扇页大小（KB）
+//#define WK_FLASH_PAGE_NUM      (WK_FLASH_SIZE/WK_FLASH_PAGE_SIZE)                // 扇页数量
+
+//#define WK_FLASH_DATA_ADDR     (FLASH_BASE+(WK_FLASH_SIZE-WK_FLASH_PAGE_SIZE)*1024)  // 数据区的起始地址
+
+//void Flash_DataWrite(uint16_t offsetAddr, uint64_t writeDate)
+//{
+//    HAL_FLASH_Unlock(); // 解锁
+
+//    FLASH_EraseInitTypeDef f;
+
+//    f.TypeErase = FLASH_TYPEERASE_PAGES;
+//    f.Page = WK_FLASH_PAGE_NUM-1;      // 选择最后一个扇页
+//    f.NbPages = 1;                  // 只擦除一页
+//    
+//    uint32_t PageError = 0;
+//    HAL_FLASHEx_Erase(&f, &PageError);  // 擦除
+//    
+//    HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, WK_FLASH_DATA_ADDR+offsetAddr, writeDate); // 写入
+
+//    HAL_FLASH_Lock();   // 锁住
+//}
+
+//uint32_t Flash_DataRead(uint16_t offsetAddr)
+//{
+//    assert_param(IS_FLASH_DATA_AREA(offsetAddr));
+//    
+//    return *(__IO uint32_t*)(WK_FLASH_DATA_ADDR+offsetAddr);
+//}
+
 void Updata_BatIco(void)
 {
 	if (last_charge_state != charge_state)
@@ -89,8 +120,8 @@ void Updata_BatIco(void)
 			LCD_ShowStr(187, 1, WHITE, BLACK, "箜", 16);
 	}
 
-	uint16_t bat = (float)adc_value*0.161;
-	
+//	uint16_t bat = (float)adc_value*0.161;
+	uint16_t bat = (float)adc_value*0.24;
 	if (bat > 390)
 		LCD_ShowBat(210, 4, 4);
 	else if (bat > 376)
@@ -228,15 +259,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   
   HAL_TIM_Base_Start_IT(&htim1);
+  HAL_TIM_PWM_Start(&htim2, TIM_CHANNEL_3); // 屏幕亮度pwm
   
-	
-
-	// 喇叭方波测试
-	HAL_DAC_SetValue(&hdac, DAC_CHANNEL_2, DAC_ALIGN_12B_R, 2048);
-	HAL_TIM_Base_Start(&htim2);
-	HAL_DAC_Start(&hdac, DAC_CHANNEL_2);
-	
-
 begin: ;
 	LCD_Clear(WHITE);
 	LCD_Fill(0, 0, 240, 18, BLACK);
@@ -270,20 +294,10 @@ begin: ;
     /* USER CODE BEGIN 3 */
 		while (1)
 		{
-
-		
 			// 显示充电标识
 			Updata_BatIco();
 			// 更新时间显示
 			Updata_Time();
-			
-			// 显示触摸坐标
-//			if (CTP.ctpxy.ctp_x != 999 && CTP.ctpxy.ctp_y != 999)
-			{
-				char str[30];
-				sprintf(str, "%3d %3d", CTP.ctpxy.ctp_x, adc_value);
-				LCD_ShowStr(0, 1, WHITE, BLACK, str, 16);
-			}
 			
 			/***********点击"开始检测"**********************************/
 			if (ScanKey_Begin())
@@ -292,13 +306,15 @@ begin: ;
 				LCD_ShowStr(72, 275, WHITE, BRRED, "正在检测", 24);
 				LCD_Fill(6, 25, 239, 96, WHITE);
 				
-				Max30102_Measure();
+				Max30102_Measure(); // 血氧检测，心率图绘制
 				
 				LCD_ShowNum(77, 115, BLACK, LGRAYBLUE, HeartRate_Value, 3, 24, ' ');
 				LCD_ShowNum(122, 145, BLACK, LGRAYBLUE, SP02_Value, 3, 24, ' ');
-				
-//				LCD_ShowStr(77, 115, BLACK, LGRAYBLUE, "999", 24);
-//				LCD_ShowStr(122, 145, BLACK, LGRAYBLUE, "999", 24);
+				char str_temp[30];
+				printf("检测完成\r\n");
+				sprintf(str_temp, "心率:%d次/秒  血氧:%d%%\r\n", HeartRate_Value, SP02_Value);
+				printf(str_temp);
+
 				LCD_Fill(65, 268, 175, 306, GRAYBLUE);
 				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, "开始检测", 24);
 			}
@@ -313,7 +329,6 @@ begin: ;
 				LCD_ShowStr(35, 106, BLACK, LIGHTGRAY, "制作人：甄益凡", 16);
 				LCD_ShowStr(35, 130, BLACK, LIGHTGRAY, "专  业：电子信息工程", 16);
 				LCD_ShowStr(35, 154, BLACK, LIGHTGRAY, "学  号：15160200314", 16);
-				
 				
 				LCD_ShowStr(72, 275, WHITE, GRAYBLUE, " 返  回 ", 24);
 				while (!ScanKey_Begin())  // 等待按下返回
@@ -351,7 +366,7 @@ begin: ;
 					Updata_Time();
 					
 					char str[30];
-					sprintf(str, "电池电压：%1.2fV", (float)adc_value*0.00161);
+					sprintf(str, "电池电压：%1.2fV", (float)adc_value*0.001886);
 					LCD_ShowStr(60, 130, BLACK, LIGHTGRAY, str, 16);
 
 					LCD_ShowStr(60, 154, BLACK, LIGHTGRAY, "截止电压：3.20V", 16);
@@ -418,6 +433,7 @@ begin: ;
 						else
 						{
 							LCD_ShowNum(139, 100, BLACK, LIGHTGRAY, ++Light_Num, 1, 24, ' ');
+							__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, Light_Num*99);
 							while (ScanKey_LightAdd()); // 等待按键松开
 						}
 					}
@@ -430,6 +446,7 @@ begin: ;
 						else
 						{
 							LCD_ShowNum(139, 100, BLACK, LIGHTGRAY, --Light_Num, 1, 24, ' ');
+							__HAL_TIM_SET_COMPARE(&htim2, TIM_CHANNEL_3, Light_Num*99);
 							while (ScanKey_LightSub()); // 等待按键松开
 						}
 					}

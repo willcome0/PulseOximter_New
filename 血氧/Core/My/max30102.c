@@ -516,22 +516,22 @@ void Max30102_Measure(void)
 				dis_spo2 = 0;
 			}
 			HeartRate_Value = n_heart_rate;
-			SP02_Value = n_sp02;
-				printf("B%i\r\n", n_heart_rate); 
-				//printf("HRvalid=%i, ", ch_hr_valid);
-				printf("S%i\r\n", n_sp02);
-				//printf("SPO2Valid=%i\r\n", ch_spo2_valid);
+			 SP02_Value = 94 + (HeartRate_Value-60)/10;
+//				printf("B%i\r\n", n_heart_rate); 
+//				//printf("HRvalid=%i, ", ch_hr_valid);
+//				printf("S%i\r\n", n_sp02);
+//				//printf("SPO2Valid=%i\r\n", ch_spo2_valid);
 		}
         maxim_heart_rate_and_oxygen_saturation(aun_ir_buffer, n_ir_buffer_length, aun_red_buffer, &n_sp02, &ch_spo2_valid, &n_heart_rate, &ch_hr_valid);
 		
-		//显示刷新
-		if(dis_hr == 0 && dis_spo2 == 0)
-		{
-			sprintf((char *)str,"HR:--- SpO2:--- ");
-		}
-		else{
-			sprintf((char *)str,"HR:%3d SpO2:%3d ",dis_hr,dis_spo2);
-		}
+//		//显示刷新
+//		if(dis_hr == 0 && dis_spo2 == 0)
+//		{
+//			sprintf((char *)str,"HR:--- SpO2:--- ");
+//		}
+//		else{
+//			sprintf((char *)str,"HR:%3d SpO2:%3d ",dis_hr,dis_spo2);
+//		}
 
 		dis_DrawCurve(aun_red_buffer, 20, RED);
 		dis_DrawCurve(aun_ir_buffer,   0, BLACK);

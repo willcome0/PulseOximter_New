@@ -78,8 +78,6 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define LCD_LEDA_Pin GPIO_PIN_2
-#define LCD_LEDA_GPIO_Port GPIOA
 #define DB_Pin GPIO_PIN_0
 #define DB_GPIO_Port GPIOB
 #define DBB1_Pin GPIO_PIN_1
@@ -106,6 +104,8 @@ void Error_Handler(void);
 #define SDA_GPIO_Port GPIOC
 #define INT_Pin GPIO_PIN_9
 #define INT_GPIO_Port GPIOC
+#define BUZZER_Pin GPIO_PIN_12
+#define BUZZER_GPIO_Port GPIOA
 #define LCD_RST_Pin GPIO_PIN_15
 #define LCD_RST_GPIO_Port GPIOA
 #define LCD_CS_Pin GPIO_PIN_10
@@ -131,7 +131,8 @@ void Error_Handler(void);
 #define DBB9_Pin GPIO_PIN_9
 #define DBB9_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
-
+#define BUZZER_Pin GPIO_PIN_12
+#define BUZZER_GPIO_Port GPIOA
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
